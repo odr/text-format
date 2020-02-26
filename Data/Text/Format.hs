@@ -1,4 +1,5 @@
-{-# LANGUAGE OverloadedStrings, RelaxedPolyRec #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RelaxedPolyRec    #-}
 
 -- |
 -- Module      : Data.Text.Format
@@ -28,26 +29,21 @@ module Data.Text.Format
     , right
     -- ** Integers
     , hex
-    -- ** Floating point numbers
-    , expt
-    , fixed
-    , prec
-    , shortest
     ) where
 
-import Control.Monad.IO.Class (MonadIO(liftIO))
-import Data.Text.Format.Functions ((<>))
-import Data.Text.Format.Params (Params(..))
-import Data.Text.Format.Types.Internal (Format(..), Only(..), Shown(..))
-import Data.Text.Format.Types.Internal (Hex(..))
-import Data.Text.Lazy.Builder
-import Prelude hiding (exp, print)
-import System.IO (Handle)
-import qualified Data.Double.Conversion.Text as C
+import           Control.Monad.IO.Class (MonadIO(liftIO))
+-- import qualified Data.Double.Conversion.Text as C
 import qualified Data.Text as ST
 import qualified Data.Text.Buildable as B
+import           Data.Text.Format.Params (Params(..))
+import           Data.Text.Format.Types.Internal
+  (Format(..), Only(..), Shown(..))
+import           Data.Text.Format.Types.Internal (Hex(..))
 import qualified Data.Text.Lazy as LT
+import           Data.Text.Lazy.Builder
 import qualified Data.Text.Lazy.IO as LT
+import           Prelude hiding (exp, print)
+import           System.IO (Handle)
 
 -- Format strings are almost always constants, and they're expensive
 -- to interpret (which we refer to as "cracking" here).  We'd really
@@ -101,48 +97,6 @@ left k c =
 right :: B.Buildable a => Int -> Char -> a -> Builder
 right k c =
     fromLazyText . LT.justifyLeft (fromIntegral k) c . toLazyText . B.build
-
--- | Render a floating point number, with the given number of digits
--- of precision.  Uses decimal notation for values between @0.1@ and
--- @9,999,999@, and scientific notation otherwise.
-prec :: (Real a) =>
-        Int
-     -- ^ Number of digits of precision.
-     -> a -> Builder
-{-# RULES "prec/Double"
-    forall d x. prec d (x::Double) = B.build (C.toPrecision d x) #-}
-prec digits = B.build . C.toPrecision digits . realToFrac
-{-# NOINLINE[0] prec #-}
-
--- | Render a floating point number using normal notation, with the
--- given number of decimal places.
-fixed :: (Real a) =>
-         Int
-      -- ^ Number of digits of precision after the decimal.
-      -> a -> Builder
-fixed decs = B.build . C.toFixed decs . realToFrac
-{-# RULES "fixed/Double"
-    forall d x. fixed d (x::Double) = B.build (C.toFixed d x) #-}
-{-# NOINLINE[0] fixed #-}
-
--- | Render a floating point number using scientific/engineering
--- notation (e.g. @2.3e123@), with the given number of decimal places.
-expt :: (Real a) =>
-        Int
-     -- ^ Number of digits of precision after the decimal.
-     -> a -> Builder
-expt decs = B.build . C.toExponential decs . realToFrac
-{-# RULES "expt/Double"
-    forall d x. expt d (x::Double) = B.build (C.toExponential d x) #-}
-{-# NOINLINE[0] expt #-}
-
--- | Render a floating point number using the smallest number of
--- digits that correctly represent it.
-shortest :: (Real a) => a -> Builder
-shortest = B.build . C.toShortest . realToFrac
-{-# RULES "shortest/Double"
-    forall x. shortest (x::Double) = B.build (C.toShortest x) #-}
-{-# NOINLINE[0] shortest #-}
 
 -- | Render an integer using hexadecimal notation.  (No leading "0x"
 -- is added.)

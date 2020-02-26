@@ -1,4 +1,7 @@
-{-# LANGUAGE CPP, FlexibleInstances, OverloadedStrings #-}
+{-# LANGUAGE CPP               #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeApplications  #-}
 
 -- |
 -- Module      : Data.Text.Buildable
@@ -17,26 +20,25 @@ module Data.Text.Buildable
     ) where
 
 #if MIN_VERSION_base(4,8,0)
-import Data.Void (Void, absurd)
+import           Data.Void (Void, absurd)
 #endif
 
-import Data.Monoid (mempty)
-import Data.Int (Int8, Int16, Int32, Int64)
-import Data.Fixed (Fixed, HasResolution, showFixed)
-import Data.Ratio (Ratio, denominator, numerator)
-import Data.Text.Format.Functions ((<>))
-import Data.Text.Format.Int (decimal, hexadecimal)
-import Data.Text.Format.Types (Hex(..), Shown(..))
-import Data.Text.Lazy.Builder
-import Data.Time.Calendar (Day, showGregorian)
-import Data.Time.Clock (DiffTime, NominalDiffTime, UTCTime, UniversalTime)
-import Data.Time.Clock (getModJulianDate)
-import Data.Time.LocalTime (LocalTime, TimeOfDay, TimeZone, ZonedTime)
-import Data.Word (Word, Word8, Word16, Word32, Word64)
-import Foreign.Ptr (IntPtr, WordPtr, Ptr, ptrToWordPtr)
-import qualified Data.Double.Conversion.Text as C
+import           Data.Fixed (Fixed, HasResolution, Micro, showFixed)
+import           Data.Int (Int16, Int32, Int64, Int8)
+import           Data.Monoid (mempty)
+import           Data.Ratio (Ratio, denominator, numerator)
 import qualified Data.Text as ST
+import           Data.Text.Format.Int (decimal, hexadecimal)
+import           Data.Text.Format.Types (Hex(..), Shown(..))
 import qualified Data.Text.Lazy as LT
+import           Data.Text.Lazy.Builder
+import           Data.Time.Calendar (Day, showGregorian)
+import           Data.Time.Clock
+  (DiffTime, NominalDiffTime, UTCTime, UniversalTime)
+import           Data.Time.Clock (getModJulianDate)
+import           Data.Time.LocalTime (LocalTime, TimeOfDay, TimeZone, ZonedTime)
+import           Data.Word (Word, Word16, Word32, Word64, Word8)
+import           Foreign.Ptr (IntPtr, Ptr, WordPtr, ptrToWordPtr)
 
 -- | The class of types that can be rendered to a 'Builder'.
 class Buildable p where
@@ -123,11 +125,11 @@ instance (Integral a, Buildable a) => Buildable (Ratio a) where
     build a = build (numerator a) <> singleton '/' <> build (denominator a)
 
 instance Buildable Float where
-    build = fromText . C.toPrecision 6 . realToFrac
+    build = build . realToFrac @_ @Micro
     {-# INLINE build #-}
 
 instance Buildable Double where
-    build = fromText . C.toPrecision 6
+    build = build . realToFrac @_ @Micro
     {-# INLINE build #-}
 
 instance Buildable DiffTime where
@@ -155,7 +157,7 @@ instance (Show a) => Buildable (Shown a) where
     {-# INLINE build #-}
 
 instance (Buildable a) => Buildable (Maybe a) where
-    build Nothing = mempty
+    build Nothing  = mempty
     build (Just v) = build v
     {-# INLINE build #-}
 
@@ -185,5 +187,5 @@ instance Buildable (Ptr a) where
     build = build . ptrToWordPtr
 
 instance Buildable Bool where
-    build True = fromText "True"
+    build True  = fromText "True"
     build False = fromText "False"

@@ -24,6 +24,7 @@ module Data.Text.Format.Types.Internal
 import Data.Monoid (Monoid(..))
 import Data.String (IsString(..))
 import Data.Text (Text)
+import Data.Tuple.Only (Only(..))
 import Data.Typeable (Typeable)
 
 -- | A format string. This is intentionally incompatible with other
@@ -59,13 +60,6 @@ instance IsString Format where
 -- | Render an integral type in hexadecimal.
 newtype Hex a = Hex a
     deriving (Eq, Ord, Read, Show, Num, Real, Enum, Integral)
-
--- | Use this @newtype@ wrapper for your single parameter if you are
--- formatting a string containing exactly one substitution site.
-newtype Only a = Only {
-      fromOnly :: a
-    } deriving (Eq, Show, Read, Ord, Num, Fractional, Real, RealFrac,
-                Floating, RealFloat, Enum, Integral, Bounded)
 
 -- | Render a value using its 'Show' instance.
 newtype Shown a = Shown {

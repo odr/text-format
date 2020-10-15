@@ -1,5 +1,3 @@
-{-# LANGUAGE DeriveDataTypeable, GeneralizedNewtypeDeriving #-}
-
 -- |
 -- Module      : Data.Text.Format.Types
 -- Copyright   : (c) 2011 MailRank, Inc.

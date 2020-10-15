@@ -37,8 +37,7 @@ import qualified Data.Text as ST
 import qualified Data.Text.Buildable as B
 import           Data.Text.Format.Params (Params(..))
 import           Data.Text.Format.Types.Internal
-  (Format(..), Only(..), Shown(..))
-import           Data.Text.Format.Types.Internal (Hex(..))
+  (Format(..), Hex(..), Only(..), Shown(..))
 import qualified Data.Text.Lazy as LT
 import           Data.Text.Lazy.Builder
 import qualified Data.Text.Lazy.IO as LT
